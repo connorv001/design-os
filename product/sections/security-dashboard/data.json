@@ -1,0 +1,458 @@
+{
+  "_meta": {
+    "models": {
+      "repositories": "A connected code repository (GitHub/GitLab) that gets scanned for vulnerabilities.",
+      "scans": "A Kubescape security scan run on a repository, identifying vulnerabilities at a point in time.",
+      "vulnerabilities": "A specific security issue found by Kubescape, with severity and details.",
+      "fixes": "An AI-generated code fix for a vulnerability, created by Claude.",
+      "pullRequests": "An automated PR containing one or more fixes, awaiting review."
+    },
+    "relationships": [
+      "Repository has many Scans",
+      "Scan discovers many Vulnerabilities",
+      "Vulnerability has one Fix",
+      "Pull Request contains many Fixes",
+      "Pull Request belongs to Repository"
+    ]
+  },
+  "repositories": [
+    {
+      "id": "repo-001",
+      "name": "api-gateway",
+      "fullName": "zelyo/api-gateway",
+      "platform": "github",
+      "url": "https://github.com/zelyo/api-gateway",
+      "language": "Go",
+      "branch": "main",
+      "lastScanned": "2024-02-10T14:30:00Z"
+    },
+    {
+      "id": "repo-002",
+      "name": "web-dashboard",
+      "fullName": "zelyo/web-dashboard",
+      "platform": "github",
+      "url": "https://github.com/zelyo/web-dashboard",
+      "language": "TypeScript",
+      "branch": "main",
+      "lastScanned": "2024-02-10T09:15:00Z"
+    },
+    {
+      "id": "repo-003",
+      "name": "k8s-manifests",
+      "fullName": "zelyo/k8s-manifests",
+      "platform": "gitlab",
+      "url": "https://gitlab.com/zelyo/k8s-manifests",
+      "language": "YAML",
+      "branch": "production",
+      "lastScanned": "2024-02-09T16:45:00Z"
+    }
+  ],
+  "scans": [
+    {
+      "id": "scan-001",
+      "repositoryId": "repo-001",
+      "status": "completed",
+      "startedAt": "2024-02-10T14:25:00Z",
+      "completedAt": "2024-02-10T14:30:00Z",
+      "vulnerabilitiesFound": 3,
+      "criticalCount": 1,
+      "highCount": 1,
+      "mediumCount": 1,
+      "lowCount": 0
+    },
+    {
+      "id": "scan-002",
+      "repositoryId": "repo-002",
+      "status": "completed",
+      "startedAt": "2024-02-10T09:10:00Z",
+      "completedAt": "2024-02-10T09:15:00Z",
+      "vulnerabilitiesFound": 4,
+      "criticalCount": 2,
+      "highCount": 1,
+      "mediumCount": 1,
+      "lowCount": 0
+    },
+    {
+      "id": "scan-003",
+      "repositoryId": "repo-003",
+      "status": "completed",
+      "startedAt": "2024-02-09T16:40:00Z",
+      "completedAt": "2024-02-09T16:45:00Z",
+      "vulnerabilitiesFound": 2,
+      "criticalCount": 0,
+      "highCount": 1,
+      "mediumCount": 0,
+      "lowCount": 1
+    },
+    {
+      "id": "scan-004",
+      "repositoryId": "repo-001",
+      "status": "running",
+      "startedAt": "2024-02-10T15:00:00Z",
+      "completedAt": null,
+      "vulnerabilitiesFound": 0,
+      "criticalCount": 0,
+      "highCount": 0,
+      "mediumCount": 0,
+      "lowCount": 0
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "id": "vuln-001",
+      "scanId": "scan-001",
+      "repositoryId": "repo-001",
+      "severity": "critical",
+      "status": "fix_pending",
+      "title": "SQL Injection in User Authentication",
+      "description": "Unsanitized user input is directly interpolated into SQL queries in the authentication handler, allowing potential SQL injection attacks. This could lead to unauthorized access, data theft, or database manipulation.",
+      "cveId": "CVE-2024-1234",
+      "affectedFiles": [
+        {
+          "path": "internal/auth/handler.go",
+          "lineStart": 45,
+          "lineEnd": 52,
+          "code": "func (h *Handler) Login(username, password string) error {\n    query := fmt.Sprintf(\"SELECT * FROM users WHERE username='%s' AND password='%s'\", username, password)\n    rows, err := h.db.Query(query)\n    if err != nil {\n        return err\n    }\n    defer rows.Close()\n}"
+        }
+      ],
+      "detectedAt": "2024-02-10T14:28:00Z",
+      "fixId": "fix-001"
+    },
+    {
+      "id": "vuln-002",
+      "scanId": "scan-001",
+      "repositoryId": "repo-001",
+      "severity": "high",
+      "status": "pr_created",
+      "title": "Insecure JWT Secret Key Storage",
+      "description": "JWT secret key is hardcoded in the source code, making it visible to anyone with repository access. This compromises the security of all issued tokens.",
+      "cveId": null,
+      "affectedFiles": [
+        {
+          "path": "pkg/jwt/jwt.go",
+          "lineStart": 12,
+          "lineEnd": 14,
+          "code": "const (\n    jwtSecret = \"my-secret-key-12345\"\n)"
+        }
+      ],
+      "detectedAt": "2024-02-10T14:29:00Z",
+      "fixId": "fix-002"
+    },
+    {
+      "id": "vuln-003",
+      "scanId": "scan-001",
+      "repositoryId": "repo-001",
+      "severity": "medium",
+      "status": "pr_merged",
+      "title": "Missing Rate Limiting on API Endpoints",
+      "description": "API endpoints lack rate limiting mechanisms, making the service vulnerable to denial-of-service attacks and abuse.",
+      "cveId": null,
+      "affectedFiles": [
+        {
+          "path": "cmd/server/main.go",
+          "lineStart": 28,
+          "lineEnd": 35,
+          "code": "func setupRoutes(r *mux.Router) {\n    r.HandleFunc(\"/api/login\", loginHandler)\n    r.HandleFunc(\"/api/users\", usersHandler)\n    r.HandleFunc(\"/api/data\", dataHandler)\n    // No rate limiting middleware\n}"
+        }
+      ],
+      "detectedAt": "2024-02-10T14:29:00Z",
+      "fixId": "fix-003"
+    },
+    {
+      "id": "vuln-004",
+      "scanId": "scan-002",
+      "repositoryId": "repo-002",
+      "severity": "critical",
+      "status": "fix_pending",
+      "title": "Cross-Site Scripting (XSS) in User Comments",
+      "description": "User-generated content is rendered without proper sanitization, allowing attackers to inject malicious scripts that execute in other users' browsers. This can lead to session hijacking, credential theft, or malicious actions performed on behalf of users.",
+      "cveId": "CVE-2024-5678",
+      "affectedFiles": [
+        {
+          "path": "src/components/CommentList.tsx",
+          "lineStart": 18,
+          "lineEnd": 22,
+          "code": "export function CommentList({ comments }: Props) {\n  return (\n    <div>\n      {comments.map(c => <div dangerouslySetInnerHTML={{ __html: c.text }} />)}\n    </div>\n  )\n}"
+        }
+      ],
+      "detectedAt": "2024-02-10T09:12:00Z",
+      "fixId": "fix-004"
+    },
+    {
+      "id": "vuln-005",
+      "scanId": "scan-002",
+      "repositoryId": "repo-002",
+      "severity": "critical",
+      "status": "pr_created",
+      "title": "Exposed Sensitive Environment Variables",
+      "description": "Environment variables containing API keys and secrets are bundled into the client-side JavaScript, exposing them to anyone inspecting the network traffic or source code.",
+      "cveId": null,
+      "affectedFiles": [
+        {
+          "path": "src/config/api.ts",
+          "lineStart": 1,
+          "lineEnd": 5,
+          "code": "export const config = {\n  apiKey: process.env.REACT_APP_API_KEY,\n  secretToken: process.env.REACT_APP_SECRET_TOKEN,\n  databaseUrl: process.env.REACT_APP_DB_URL\n}"
+        }
+      ],
+      "detectedAt": "2024-02-10T09:13:00Z",
+      "fixId": "fix-005"
+    },
+    {
+      "id": "vuln-006",
+      "scanId": "scan-002",
+      "repositoryId": "repo-002",
+      "severity": "high",
+      "status": "pr_created",
+      "title": "Insecure Direct Object Reference in User API",
+      "description": "User ID parameters are not validated, allowing users to access or modify other users' data by simply changing the ID in the request.",
+      "cveId": null,
+      "affectedFiles": [
+        {
+          "path": "src/api/users.ts",
+          "lineStart": 8,
+          "lineEnd": 12,
+          "code": "export async function getUserData(userId: string) {\n  const response = await fetch(`/api/users/${userId}`)\n  return response.json()\n  // No authorization check\n}"
+        }
+      ],
+      "detectedAt": "2024-02-10T09:14:00Z",
+      "fixId": "fix-006"
+    },
+    {
+      "id": "vuln-007",
+      "scanId": "scan-002",
+      "repositoryId": "repo-002",
+      "severity": "medium",
+      "status": "ignored",
+      "title": "Outdated React Version with Known Vulnerabilities",
+      "description": "The project uses React 16.8.0 which has known security vulnerabilities. Upgrading to the latest version is recommended.",
+      "cveId": "CVE-2023-9876",
+      "affectedFiles": [
+        {
+          "path": "package.json",
+          "lineStart": 12,
+          "lineEnd": 14,
+          "code": "\"dependencies\": {\n  \"react\": \"16.8.0\",\n  \"react-dom\": \"16.8.0\"\n}"
+        }
+      ],
+      "detectedAt": "2024-02-10T09:14:00Z",
+      "fixId": null
+    },
+    {
+      "id": "vuln-008",
+      "scanId": "scan-003",
+      "repositoryId": "repo-003",
+      "severity": "high",
+      "status": "pr_created",
+      "title": "Privileged Container with Root Access",
+      "description": "Kubernetes deployment runs containers with privileged mode enabled and root user, violating security best practices and increasing attack surface.",
+      "cveId": null,
+      "affectedFiles": [
+        {
+          "path": "deployments/api-deployment.yaml",
+          "lineStart": 22,
+          "lineEnd": 28,
+          "code": "securityContext:\n  privileged: true\n  runAsUser: 0\n  capabilities:\n    add:\n      - SYS_ADMIN"
+        }
+      ],
+      "detectedAt": "2024-02-09T16:43:00Z",
+      "fixId": "fix-007"
+    },
+    {
+      "id": "vuln-009",
+      "scanId": "scan-003",
+      "repositoryId": "repo-003",
+      "severity": "low",
+      "status": "pr_merged",
+      "title": "Missing Resource Limits on Pods",
+      "description": "Pod specifications don't define CPU and memory limits, which could lead to resource exhaustion affecting other workloads.",
+      "cveId": null,
+      "affectedFiles": [
+        {
+          "path": "deployments/worker-deployment.yaml",
+          "lineStart": 18,
+          "lineEnd": 22,
+          "code": "containers:\n  - name: worker\n    image: zelyo/worker:latest\n    # Missing resources section"
+        }
+      ],
+      "detectedAt": "2024-02-09T16:44:00Z",
+      "fixId": "fix-008"
+    }
+  ],
+  "fixes": [
+    {
+      "id": "fix-001",
+      "vulnerabilityId": "vuln-001",
+      "status": "pending_review",
+      "generatedAt": "2024-02-10T14:35:00Z",
+      "code": "func (h *Handler) Login(username, password string) error {\n    // Use parameterized queries to prevent SQL injection\n    query := \"SELECT * FROM users WHERE username = $1 AND password = $2\"\n    rows, err := h.db.Query(query, username, password)\n    if err != nil {\n        return err\n    }\n    defer rows.Close()\n    // Additional: Should use password hashing (bcrypt) instead of plain text\n}",
+      "description": "Replaced string interpolation with parameterized queries using PostgreSQL placeholders ($1, $2). This prevents SQL injection by treating user input as data rather than executable SQL code.",
+      "confidence": 0.95,
+      "pullRequestId": null
+    },
+    {
+      "id": "fix-002",
+      "vulnerabilityId": "vuln-002",
+      "status": "pr_created",
+      "generatedAt": "2024-02-10T14:36:00Z",
+      "code": "import (\n    \"os\"\n)\n\nfunc getJWTSecret() string {\n    secret := os.Getenv(\"JWT_SECRET\")\n    if secret == \"\" {\n        panic(\"JWT_SECRET environment variable is required\")\n    }\n    return secret\n}\n\n// Usage:\n// jwtSecret := getJWTSecret()",
+      "description": "Moved JWT secret to environment variable. The secret should be set via environment configuration and never committed to source code. Added validation to ensure the secret is provided at runtime.",
+      "confidence": 0.98,
+      "pullRequestId": "pr-001"
+    },
+    {
+      "id": "fix-003",
+      "vulnerabilityId": "vuln-003",
+      "status": "merged",
+      "generatedAt": "2024-02-10T14:37:00Z",
+      "code": "import \"github.com/didip/tollbooth/v7\"\n\nfunc setupRoutes(r *mux.Router) {\n    // Rate limit: 10 requests per minute per IP\n    limiter := tollbooth.NewLimiter(10, nil)\n    \n    r.Handle(\"/api/login\", tollbooth.LimitFuncHandler(limiter, loginHandler))\n    r.Handle(\"/api/users\", tollbooth.LimitFuncHandler(limiter, usersHandler))\n    r.Handle(\"/api/data\", tollbooth.LimitFuncHandler(limiter, dataHandler))\n}",
+      "description": "Added rate limiting middleware using the tollbooth library. Limits each IP address to 10 requests per minute across all API endpoints, preventing abuse and DoS attacks.",
+      "confidence": 0.92,
+      "pullRequestId": "pr-002"
+    },
+    {
+      "id": "fix-004",
+      "vulnerabilityId": "vuln-004",
+      "status": "pending_review",
+      "generatedAt": "2024-02-10T09:18:00Z",
+      "code": "import DOMPurify from 'dompurify'\n\nexport function CommentList({ comments }: Props) {\n  return (\n    <div>\n      {comments.map(c => (\n        <div \n          key={c.id}\n          dangerouslySetInnerHTML={{ \n            __html: DOMPurify.sanitize(c.text) \n          }} \n        />\n      ))}\n    </div>\n  )\n}",
+      "description": "Added DOMPurify library to sanitize user-generated HTML content before rendering. This removes any malicious scripts while preserving safe HTML formatting. Install with: npm install dompurify @types/dompurify",
+      "confidence": 0.97,
+      "pullRequestId": null
+    },
+    {
+      "id": "fix-005",
+      "vulnerabilityId": "vuln-005",
+      "status": "pr_created",
+      "generatedAt": "2024-02-10T09:19:00Z",
+      "code": "// This config should be moved to backend only\n// Frontend should call backend API endpoints instead\n// Backend can securely access environment variables\n\n// frontend/src/config/api.ts - PUBLIC CONFIG ONLY\nexport const config = {\n  apiBaseUrl: process.env.REACT_APP_API_URL || 'http://localhost:3000'\n}\n\n// backend/.env (NOT committed to git)\nAPI_KEY=your-secret-key\nSECRET_TOKEN=your-secret-token\nDATABASE_URL=your-db-url",
+      "description": "Removed sensitive credentials from frontend code. Secrets should only exist in backend environment variables. Frontend should make authenticated API calls to backend, which handles secrets securely. Add .env to .gitignore.",
+      "confidence": 0.96,
+      "pullRequestId": "pr-003"
+    },
+    {
+      "id": "fix-006",
+      "vulnerabilityId": "vuln-006",
+      "status": "pr_created",
+      "generatedAt": "2024-02-10T09:20:00Z",
+      "code": "export async function getUserData(userId: string) {\n  // Get current authenticated user\n  const currentUser = await getCurrentUser()\n  \n  // Authorization check: users can only access their own data\n  if (currentUser.id !== userId && !currentUser.isAdmin) {\n    throw new Error('Unauthorized: Cannot access other users data')\n  }\n  \n  const response = await fetch(`/api/users/${userId}`)\n  return response.json()\n}",
+      "description": "Added authorization check to verify the requesting user has permission to access the requested user data. Users can only access their own data unless they have admin privileges. This should also be enforced on the backend API.",
+      "confidence": 0.94,
+      "pullRequestId": "pr-003"
+    },
+    {
+      "id": "fix-007",
+      "vulnerabilityId": "vuln-008",
+      "status": "pr_created",
+      "generatedAt": "2024-02-09T16:50:00Z",
+      "code": "securityContext:\n  privileged: false\n  runAsNonRoot: true\n  runAsUser: 1000\n  allowPrivilegeEscalation: false\n  capabilities:\n    drop:\n      - ALL\n  readOnlyRootFilesystem: true",
+      "description": "Removed privileged mode and root access. Container now runs as non-root user (UID 1000) with minimal capabilities and read-only filesystem. This follows Kubernetes security best practices and reduces attack surface.",
+      "confidence": 0.99,
+      "pullRequestId": "pr-004"
+    },
+    {
+      "id": "fix-008",
+      "vulnerabilityId": "vuln-009",
+      "status": "merged",
+      "generatedAt": "2024-02-09T16:51:00Z",
+      "code": "containers:\n  - name: worker\n    image: zelyo/worker:latest\n    resources:\n      requests:\n        memory: \"128Mi\"\n        cpu: \"100m\"\n      limits:\n        memory: \"256Mi\"\n        cpu: \"200m\"",
+      "description": "Added resource requests and limits for the worker container. Requests ensure minimum resources are available, while limits prevent resource exhaustion. Values should be tuned based on actual workload requirements.",
+      "confidence": 0.91,
+      "pullRequestId": "pr-005"
+    }
+  ],
+  "pullRequests": [
+    {
+      "id": "pr-001",
+      "repositoryId": "repo-001",
+      "number": 142,
+      "title": "Fix: Move JWT secret to environment variable",
+      "url": "https://github.com/zelyo/api-gateway/pull/142",
+      "status": "open",
+      "createdAt": "2024-02-10T14:40:00Z",
+      "updatedAt": "2024-02-10T14:40:00Z",
+      "fixIds": ["fix-002"],
+      "author": "zelyo-bot",
+      "reviewers": ["alex-morgan", "jordan-lee"],
+      "checks": {
+        "ci": "passed",
+        "tests": "passed",
+        "security": "passed"
+      }
+    },
+    {
+      "id": "pr-002",
+      "repositoryId": "repo-001",
+      "number": 138,
+      "title": "Add rate limiting to API endpoints",
+      "url": "https://github.com/zelyo/api-gateway/pull/138",
+      "status": "merged",
+      "createdAt": "2024-02-10T14:38:00Z",
+      "updatedAt": "2024-02-10T15:22:00Z",
+      "mergedAt": "2024-02-10T15:22:00Z",
+      "fixIds": ["fix-003"],
+      "author": "zelyo-bot",
+      "reviewers": ["alex-morgan"],
+      "checks": {
+        "ci": "passed",
+        "tests": "passed",
+        "security": "passed"
+      }
+    },
+    {
+      "id": "pr-003",
+      "repositoryId": "repo-002",
+      "number": 89,
+      "title": "Security fixes: Remove exposed secrets and add authorization",
+      "url": "https://github.com/zelyo/web-dashboard/pull/89",
+      "status": "open",
+      "createdAt": "2024-02-10T09:25:00Z",
+      "updatedAt": "2024-02-10T10:15:00Z",
+      "fixIds": ["fix-005", "fix-006"],
+      "author": "zelyo-bot",
+      "reviewers": ["sam-rivera", "jordan-lee"],
+      "checks": {
+        "ci": "passed",
+        "tests": "failed",
+        "security": "passed"
+      }
+    },
+    {
+      "id": "pr-004",
+      "repositoryId": "repo-003",
+      "number": 34,
+      "title": "Fix: Remove privileged mode from API deployment",
+      "url": "https://gitlab.com/zelyo/k8s-manifests/-/merge_requests/34",
+      "status": "open",
+      "createdAt": "2024-02-09T17:00:00Z",
+      "updatedAt": "2024-02-09T17:00:00Z",
+      "fixIds": ["fix-007"],
+      "author": "zelyo-bot",
+      "reviewers": ["alex-morgan"],
+      "checks": {
+        "ci": "running",
+        "tests": "pending",
+        "security": "passed"
+      }
+    },
+    {
+      "id": "pr-005",
+      "repositoryId": "repo-003",
+      "number": 33,
+      "title": "Add resource limits to worker pods",
+      "url": "https://gitlab.com/zelyo/k8s-manifests/-/merge_requests/33",
+      "status": "merged",
+      "createdAt": "2024-02-09T17:05:00Z",
+      "updatedAt": "2024-02-09T18:30:00Z",
+      "mergedAt": "2024-02-09T18:30:00Z",
+      "fixIds": ["fix-008"],
+      "author": "zelyo-bot",
+      "reviewers": ["sam-rivera"],
+      "checks": {
+        "ci": "passed",
+        "tests": "passed",
+        "security": "passed"
+      }
+    }
+  ]
+}
